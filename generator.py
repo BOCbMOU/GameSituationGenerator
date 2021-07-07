@@ -1,7 +1,26 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Union, TypedDict
+
+import re
 import csv
 
+# defaults -------------------------
+
+csvPath = './data/TestData.csv'
+gsOutputPath = './output/GameSituation.txt'
+stylesOutputPath = './output/Styles.txt'
+
+shouldAddStylesToGS = True
+
+# ----------------------------------
+
+def consoleCyanColor(text: str):
+    return f'\x1b[36m{text}\x1b[0m'
+
+print(consoleCyanColor('Running...\n'));
+
+#* CODE ----------------------------
+#* General -------------------------
 
 def removeNewLines(text: str):
     return text.replace('\n', '').replace('  ', ' ').replace('  ', ' ')
@@ -9,8 +28,12 @@ def removeNewLines(text: str):
 def readTextFile(path: str):
     return open(path, 'r').read()
 
+#* Css -----------------------------
+
 def wrapCss(cssAsText: str):
-    return f'<style type="text/css">{removeNewLines(cssAsText)}</style>'
+    inlineCss = removeNewLines(cssAsText)
+    noSpacesCss = re.sub('\\s+([\\{\\}:;])\\s+', '\\1', inlineCss)
+    return f'<style type="text/css">{noSpacesCss}</style>'
 
 def getStyles(path: str):
     return wrapCss(readTextFile(path))
@@ -20,7 +43,6 @@ spoilerStyles = getStyles('./styles/spoiler.css')
 
 
 spoilerScript = removeNewLines(readTextFile('./javascript/spoiler.js'))
-print(spoilerScript)
 def getSpoilerStart(title: str):
     return removeNewLines(f"""
 <div class="spoiler-2">
@@ -38,6 +60,27 @@ def getSpoilerEnd():
 schemeColor = "#c800c8"
 runeColor = "#0e661e"
 
+#* Wrapers Start-End ---------------
+
+def wHtmlStart(tag: str, id: str, className: str):
+    attrId = f' id="{id}"' if bool(id) else ''
+    attrClassName = f' class="{className}"' if bool(className) else ''
+    return f'<{tag}{attrId}{attrClassName}>'
+def wHtmlEnd(tag: str):
+    return f'</{tag}>'
+
+def wBlockStart(id: str = '', className: str = ''):
+    return wHtmlStart('div', id, className)  
+def wBlockEnd():
+    return wHtmlEnd('div')
+
+def wInlineStart(id: str = '', className: str = ''):
+    return wHtmlStart('span', id, className)
+def wInlineEnd():
+    return wHtmlEnd('span')
+
+#* Wrapers -------------------------
+
 def wwBold(text: str):
     return f'[b]{text}[/b]'
 
@@ -50,10 +93,8 @@ def wwUnderline(text: str):
 def wwSize(text: str, size: int):
     return f'[size={size}]{text}[/size]'
 
-def wwHtml(tag:str, text: str, id: str, className: str):
-    attrId = f' id={id}' if bool(id) else ''
-    attrClassName = f' class={className}' if bool(className) else ''
-    return f'<{tag}{attrId}{attrClassName}>{text}</{tag}>'
+def wwHtml(tag: str, text: str, id: str, className: str):
+    return f'{wHtmlStart(tag, id, className)}{text}{wHtmlEnd(tag)}'
 
 def wwBlock(text: str, id: str = '', className: str = ''):
     return wwHtml('div', text, id, className)
@@ -96,6 +137,8 @@ def wrapGold(count: str, price: str):
     priceText = f'{price} зол.'
     return f'<span class="text-highlight text-highlight__gold">[{countText}{priceText}]</span>'
 
+
+#* Parser --------------------------
 
 def readCsv(filename: str) -> "list[list[list[str]]]":
     rows = []
@@ -208,19 +251,22 @@ def csvToDict(filename: str):
             gameList.append(data)
             
         
-    l = [] # i don't like one letter variable names in most cases, but this one looks interesting)
+    l: list[str] = [] # i don't like one letter variable names in most cases, but this one looks interesting)
+    l.append(wBlockStart('', 'message-content'))
 
     # IS generation
-    l.append(wwSize('Игроки', 18))
+    l.append(wwSize(wwBold('Игроки'), 18))
     l.append(getSpoilerStart('Игроков много - нажать для прочтения'))
+    l.append(wBlockStart('', 'players'))
 
     for player in players:
-        l.append(wwBold(player['pc_name']))
+        l.append(wBlockStart('', 'players__unit'))
+        l.append(wwInline(player['pc_name'], '', 'players__unit-name'))
         if (player['mana1_amt'] != "0"): # if player spent all mana then mana info will be hidden
-            mana1 = wwManaColor(player['mana1'], f"{player['mana1']}: {player['mana1_amt']}")
-            mana2 = wwManaColor(player['mana2'], f"{player['mana2']}: {player['mana2_amt']}")
+            mana1 = wwManaColor(f"{player['mana1']}: {player['mana1_amt']}", player['mana1'])
+            mana2 = wwManaColor(f"{player['mana2']}: {player['mana2_amt']}", player['mana2'])
             l.append(f'{mana1} {mana2}')
-        l.append(f"ХП: {player['hp']}. Магия: {player['magic']}")
+        l.append(f"{wwBold('ХП:')} {player['hp']}. {wwBold('Магия:')} {player['magic']}.")
         
 
         WithOwner = TypedDict('WithOwner', { 'owner': str })
@@ -230,7 +276,7 @@ def csvToDict(filename: str):
             owner = item.get('owner') if ('owner' in item) else item['pc_name']
             return owner == player['pc_name']
 
-        def lAppend(prefix: str, dataList: list):
+        def lAppendList(prefix: str, dataList: list):
             if (len(dataList) > 0):
                 l.append(f"{prefix}{', '.join(dataList)}")
             
@@ -241,7 +287,7 @@ def csvToDict(filename: str):
             if isOwner(playerScheme):
                 playerSchemesList.append(wwColor(playerScheme['name'], schemeColor))
 
-        lAppend('Схемы: ', playerSchemesList)
+        lAppendList(wwBold('Схемы: '), playerSchemesList)
         
 
         runesList: list[str] = []
@@ -249,13 +295,13 @@ def csvToDict(filename: str):
             if isOwner(playerRune):
                 runesList.append(wwColor(playerRune['name'], runeColor))
 
-        lAppend('Руны: ', playerSchemesList)
+        lAppendList(wwBold('Руны: '), playerSchemesList)
         
         
         if (bool(player['perma_potion'])):
-            l.append(f"Пермазелье: {player['perma_potion']}")
+            l.append(f"{wwBold('Пермазелье:')} {player['perma_potion']}")
         if (bool(player['armor'])):
-            l.append(f"Броня: {player['armor']}")
+            l.append(f"{wwBold('Броня:')} {player['armor']}")
             
         
         miscsList: list[str] = []
@@ -263,26 +309,29 @@ def csvToDict(filename: str):
             if isOwner(misc):
                 miscsList.append(misc['item'])
         
-        lAppend('Разное: ', miscsList)
+        lAppendList(wwBold('Разное: '), miscsList)
 
         
-        l.append(f"Золото: {player['gold']}")
-        l.append(f"База: {player['base']}")
-        l.append('')
-    
+        l.append(f"{wwBold('Золото:')} {player['gold']}")
+        l.append(f"{wwBold('База:')} {player['base']}")
+        l.append(wBlockEnd())
+
+    l.append(wBlockEnd())
     l.append(getSpoilerEnd())
     
+
     def formatGoods(good: GoodDict):
-        price = wrapGold(good['amt'], good['price'])
+        amount = '' if (good['amt'] == 'неогр.') else good['amt']
+        price = wrapGold(amount, good['price'])
         goodsType = good['type']
         goodName = good['name']
         
         if goodsType == "scheme":
-            return (f"{price}Схема {wwColor(goodName, schemeColor)}")
+            return (f"{price} Схема {wwColor(goodName, schemeColor)}")
         if goodsType == "rune":
-            return (f"{price}Руна {wwColor(goodName, runeColor)}")
+            return (f"{price} Руна {wwColor(goodName, runeColor)}")
         
-        return (f'{price}{goodName}')
+        return (f'{price} {goodName}')
     
     def formatAction(action: ActionDict):
         actionName = wwColor(wwUnderline(f"[{action['name']}]"), 'blue')
@@ -352,12 +401,12 @@ def csvToDict(filename: str):
         return ml
         
 
-    l.append(wwSize("Города", 18))
+    l.append(wwSize(wwBold("Города"), 18))
     for city in cities:
         l += formatCityLocation(city)
 
 
-    l.append(wwSize("Квесты", 18))
+    l.append(wwSize(wwBold("Квесты"), 18))
     i = 1
     for quest in quests:
         l.append(f"{i}. {quest['descr']}")
@@ -369,7 +418,7 @@ def csvToDict(filename: str):
     def wrapSomeInfo(info: str, description: str):
         return f"{wwColor(wwUnderline(info), 'blue')}. {wwItalic(description)}"
 
-    l.append(wwSize("Локации", 18))
+    l.append(wwSize(wwBold("Локации"), 18))
 
     generalLocInfo = '[Исследовать, охотиться, идти вглубь, искать проблем и т.д.]'
     generalLocDescription = 'Для всех локаций ниже доступны любые приказы: можно пытаться найти скрытую локацию, охотиться на монстров, собирать ресурсы или пытаться пройти вглубь в поисках новых локаций.'
@@ -380,7 +429,7 @@ def csvToDict(filename: str):
         l += formatMetaLocation(metaLocation)
         
 
-    l.append(wwSize("Алхимия", 18))
+    l.append(wwSize(wwBold("Алхимия"), 18))
     generalAlchInfo = '[Сварить зелья]'
     generalAlchDescription = f"Потратив действие, можно попытаться сварить до трёх зелий. Каждое зелье состоит из ровно двух компонент. Можно пытаться сварить зелье \"вслепую\", не зная рецепта. Однако некоторые рецепты не сущетсвуют, и подобная попытка приведет к потере ингредиентов.\nАссортимент зелий меняется {wwUnderline('каждый')} ход!!!"
     
@@ -398,7 +447,7 @@ def csvToDict(filename: str):
     l.append('')  
 
 
-    l.append(wwSize("Заклинания", 18))
+    l.append(wwSize(wwBold("Заклинания"), 18))
     
     l.append(getSpoilerStart("Свойства Заклинаний (нажать для прочтения)"))
     for spelProperty in spellProperties:
@@ -416,15 +465,32 @@ def csvToDict(filename: str):
                 l.append( f"[{wwColor(spell['rune'], runeColor)}, {spell['mana']}]. {spellName} {spell['tags']}")
                 l.append(wwItalic(spell['descr']))
         l.append(getSpoilerEnd())
-    l.append(colorizeStyles)
-    l.append(spoilerStyles)
+
+    l.append(wBlockEnd()) # 'message-content'
     return l
 
+gameSituatuion = csvToDict(csvPath)
+gameSituatuionText = '\n'.join(gameSituatuion)
 
-gameSituatuion = csvToDict("./data/TestData.csv")
-output = open("./output/GameSituation.txt", "a")
-output.truncate(0)
-for line in gameSituatuion: 
-    # print(line)
-    output.write(f'{line}\n')
-output.close()
+styles = ''.join([colorizeStyles, spoilerStyles])
+
+if (shouldAddStylesToGS):
+    gameSituatuionText += styles
+
+#* Outputs --------------------------------------
+
+gsOutput = open(gsOutputPath, 'a')
+gsOutput.truncate(0)
+
+# print(gameSituatuionText)
+gsOutput.write(gameSituatuionText)
+
+gsOutput.close()
+
+stylesOutput = open(stylesOutputPath, 'a')
+stylesOutput.truncate(0)
+
+# print(styles)
+stylesOutput.write(styles)
+
+stylesOutput.close()
