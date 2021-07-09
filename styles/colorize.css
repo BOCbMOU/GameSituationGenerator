@@ -1,3 +1,15 @@
+/* general */
+.bold {
+  font-weight: bold;
+}
+.italic {
+  font-style: italic;
+}
+.underline {
+  text-decoration: underline;
+}
+
+/* mana color */
 .text-highlight {
   padding: 0px 4px 1px;
 }
@@ -13,8 +25,8 @@
 }
 
 .text-highlight__earth {
-  color: #9e002e;
-  background: #81c784;
+  color: #900000;
+  background: #89ce8c;
 }
 
 .text-highlight__air {
@@ -48,36 +60,147 @@ span.postbody .text-highlight__blur-border {
 
 /* other */
 .message-content {
-  margin-left: 10px;
+  margin: 0 16px;
   font-size: 0.75rem;
   color: #000;
 }
-.message-content span[style] {
+.postbody .message-content .bold,
+.postbody .message-content .italic {
+  color: #006699;
+}
+.inframe_rt .message-content .bold,
+.inframe_rt .message-content .italic {
   color: #775d39;
 }
+.message-content .underline {
+  color: #000;
+}
 
+/* players */
 .players {
   display: flex;
   flex-wrap: wrap;
 }
 
-.players__unit {
+.players__item {
   box-sizing: border-box;
   width: 25%;
   min-width: 230px;
   margin: 0 0 28px;
   padding: 4px 16px 0 4px;
 }
-.players__unit span[style] {
+.players__item span[style] {
   color: #000;
 }
 
-.players__unit-name {
+.players__item-name {
   display: block;
   font-size: 14px;
   margin-bottom: 4px;
   font-weight: bold;
 }
-.players__unit-name + br {
+.players__item-name + br {
+  display: none;
+}
+
+.players__item-mana {
+  margin-bottom: 4px;
+}
+.players__item-mana br,
+.players__item-mana + br {
+  display: none;
+}
+
+/* cities */
+.cities {
+}
+.cities br:first-child,
+.cities br:last-child {
+  display: none;
+}
+
+.cities__item {
+  margin-top: 8px;
+}
+
+.cities__item-title {
+  position: sticky;
+  top: 0;
+  margin-bottom: 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #0004;
+}
+.cities__item-title + br {
+  display: none;
+}
+.postbody .cities__item-title {
+  background: #efefef;
+}
+.inframe_rt .cities__item-title {
+  background: #f1e2c2;
+}
+
+/* quests */
+.quests {
+}
+.quests br:first-child,
+.quests br:last-child {
+  display: none;
+}
+
+.quests__item {
+  margin-bottom: 8px;
+}
+.quests__item br:first-child,
+.quests__item + br {
+  display: none;
+}
+
+/* locations */
+.locations {
+}
+.locations br:first-child,
+.locations br:last-child {
+  display: none;
+}
+
+/* alchemy */
+.alchemy {
+}
+.alchemy br:first-child,
+.alchemy br:last-child {
+  display: none;
+}
+
+/* spells */
+.spells {
+}
+
+.spells__scheme-spell {
+  margin-bottom: 8px;
+}
+.spells__scheme-spell br:first-child,
+.spells__scheme-spell + br {
+  display: none;
+}
+
+/* helpers */
+.shop {
+  line-height: 18px;
+}
+
+/* ------ lifecode adaptation ------ */
+.content-frame_block,
+.header-frame {
+  width: 80%;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.post_body {
+  margin-left: 0;
+}
+
+.poster {
   display: none;
 }

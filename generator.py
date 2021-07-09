@@ -82,13 +82,13 @@ def wInlineEnd():
 #* Wrapers -------------------------
 
 def wwBold(text: str):
-    return f'[b]{text}[/b]'
+    return wwInline(text, '', 'bold')
 
 def wwItalic(text: str):
-    return f'[i]{text}[/i]'
+    return wwInline(text, '', 'italic')
 
 def wwUnderline(text: str):
-    return f'[u]{text}[/u]'
+    return wwInline(text, '', 'underline')
 
 def wwSize(text: str, size: int):
     return f'[size={size}]{text}[/size]'
@@ -165,7 +165,7 @@ LocationDict = TypedDict('LocationDict', {'visibility':str,'name':str,'meta_loc 
 LocationPropertyDict = TypedDict('LocationPropertyDict', {'visibility':str}) # no in test data
 MetaLocationDict = TypedDict('MetaLocationDict', {'visibility':str,'name':str,'meta_loc / fightable':str,'color':str,'description':str,'hide?':str,'harvest':str})
 MiscDict = TypedDict('MiscDict', {'visibility':str,'pc_name':str,'item':str})
-PlayerDict = TypedDict('PlayerDict', {'visibility':str,'pc_name':str,'hp':str,'magic':str,'mana1':str,'mana1_amt':str,'mana2':str,'mana2_amt':str,'gold':str,'base':str,'perma_potion':str,'armor':str})
+PlayerDict = TypedDict('PlayerDict', {'visibility':str,'pc_name':str,'hp':str,'magic':str,'mana1':str,'mana1_amt':str,'mana2':str,'mana2_amt':str,'mana3':str,'mana3_amt':str,'mana4':str,'mana4_amt':str,'mana5':str,'mana5_amt':str,'mana6':str,'mana6_amt':str,'gold':str,'base':str,'perma_potion':str,'armor':str,'perk':str})
 PlayerRuneDict = TypedDict('PlayerRuneDict', {'visibility':str,'owner':str,'name':str})
 PlayerSchemeDict = TypedDict('PlayerSchemeDict', {'visibility':str,'owner':str,'name':str})
 PotionDict = TypedDict('PotionDict', {'visibility':str,'name':str,'effect':str,'sell':str,'buy':str,'ingr1':str,'ingr2':str,'limited_amt':str})
@@ -260,13 +260,24 @@ def csvToDict(filename: str):
     l.append(wBlockStart('', 'players'))
 
     for player in players:
-        l.append(wBlockStart('', 'players__unit'))
-        l.append(wwInline(player['pc_name'], '', 'players__unit-name'))
-        if (player['mana1_amt'] != "0"): # if player spent all mana then mana info will be hidden
-            mana1 = wwManaColor(f"{player['mana1']}: {player['mana1_amt']}", player['mana1'])
-            mana2 = wwManaColor(f"{player['mana2']}: {player['mana2_amt']}", player['mana2'])
-            l.append(f'{mana1} {mana2}')
-        l.append(f"{wwBold('ХП:')} {player['hp']}. {wwBold('Магия:')} {player['magic']}.")
+        l.append(wBlockStart('', 'players__item'))
+        l.append(wwInline(player['pc_name'], '', 'players__item-name'))
+
+        l.append(wBlockStart('', 'players__item-mana'))
+        manasList: list[str] = []
+        for i in range(1, 7):
+            if (f'mana{i}' in player):
+                manaName = player[f'mana{i}']
+                if (manaName == '' or manaName[0] == '-'):
+                    continue
+                manasList.append(wwManaColor(f"{manaName}: {player[f'mana{i}_amt']}", manaName))
+        l.append(' '.join(manasList))
+        l.append(wBlockEnd())
+
+        l.append(f"{wwSize(wwBold('ХП:'), 11)} {player['hp']}. {wwSize(wwBold('Магия:'), 11)} {player['magic']}.")
+
+        if (player['perk'] != ''):
+            l.append(wwItalic(player['perk']))
         
 
         WithOwner = TypedDict('WithOwner', { 'owner': str })
@@ -278,16 +289,16 @@ def csvToDict(filename: str):
 
         def lAppendList(prefix: str, dataList: list):
             if (len(dataList) > 0):
-                l.append(f"{prefix}{', '.join(dataList)}")
+                l.append(f"{prefix} {', '.join(dataList)}")
             
             
         
-        playerSchemesList: list[str] = []
+        schemesList: list[str] = []
         for playerScheme in playerSchemes:
             if isOwner(playerScheme):
-                playerSchemesList.append(wwColor(playerScheme['name'], schemeColor))
+                schemesList.append(wwColor(playerScheme['name'], schemeColor))
 
-        lAppendList(wwBold('Схемы: '), playerSchemesList)
+        lAppendList(wwSize(wwBold('Схемы:'), 11), schemesList)
         
 
         runesList: list[str] = []
@@ -295,13 +306,13 @@ def csvToDict(filename: str):
             if isOwner(playerRune):
                 runesList.append(wwColor(playerRune['name'], runeColor))
 
-        lAppendList(wwBold('Руны: '), playerSchemesList)
+        lAppendList(wwSize(wwBold('Руны:'), 11), runesList)
         
         
         if (bool(player['perma_potion'])):
-            l.append(f"{wwBold('Пермазелье:')} {player['perma_potion']}")
+            l.append(f"{wwSize(wwBold('Пермазелье:'), 11)} {player['perma_potion']}")
         if (bool(player['armor'])):
-            l.append(f"{wwBold('Броня:')} {player['armor']}")
+            l.append(f"{wwSize(wwBold('Броня:'), 11)} {player['armor']}")
             
         
         miscsList: list[str] = []
@@ -309,11 +320,11 @@ def csvToDict(filename: str):
             if isOwner(misc):
                 miscsList.append(misc['item'])
         
-        lAppendList(wwBold('Разное: '), miscsList)
+        lAppendList(wwSize(wwBold('Разное:'), 11), miscsList)
 
         
-        l.append(f"{wwBold('Золото:')} {player['gold']}")
-        l.append(f"{wwBold('База:')} {player['base']}")
+        l.append(f"{wwSize(wwBold('Золото:'), 11)} {player['gold']}")
+        l.append(f"{wwSize(wwBold('База:'), 11)} {player['base']}")
         l.append(wBlockEnd())
 
     l.append(wBlockEnd())
@@ -334,7 +345,7 @@ def csvToDict(filename: str):
         return (f'{price} {goodName}')
     
     def formatAction(action: ActionDict):
-        actionName = wwColor(wwUnderline(f"[{action['name']}]"), 'blue')
+        actionName = wwUnderline(wwColor(f"[{action['name']}]", 'blue'))
         description = wwItalic(action['descr'])
         return f"{actionName}. {description}"
 
@@ -344,7 +355,7 @@ def csvToDict(filename: str):
 
         ld: list[str] = []
         locName = loc['name']
-        ld.append(f"{wwUnderline(locName)}{additionalInfo}")
+        ld.append(f"{wwBold(wwColor(locName, 'black'))}{additionalInfo}")
 
         # for locProperty in locationProperties:
         #     if locProperty[1] == locName:
@@ -355,11 +366,16 @@ def csvToDict(filename: str):
         else:
             ld.append(wwItalic(loc['description']))
         
+        goodsList: list[str] = []
         for good in goods:
             if good['where_at'] == locName:
                 formattedGood = formatGoods(good)
                 description = wwItalic(f". {good['descr']}") if bool(good['descr']) else ''
-                ld.append(f"{formattedGood}{description}")
+                goodsList.append(f"{formattedGood}{description}")
+        if (len(goodsList) > 0):
+            ld.append(wBlockStart('', 'shop'))
+            ld += goodsList
+            ld.append(wBlockEnd())
         
         for action in actions:
             if action['where_at'] == locName:
@@ -375,15 +391,47 @@ def csvToDict(filename: str):
             return []
 
         cl: list[str] = []
-        cl.append("")
         cityName = city['name']
-        cl.append(wwBold(wwColor(cityName, city['color'])))
+
+        cl.append(wBlockStart('', 'cities__item'))
+        cl.append(wwBlock(wwSize(wwBold(wwColor(cityName, city['color'])), 16), '', 'cities__item-title'))
 
         for loc in locations:
             locationData = getLocationData(loc, cityName)
             cl += locationData
+        
+        cl.append(wBlockEnd())
 
         return cl
+        
+
+    l.append(wBlockStart('', 'cities'))
+    l.append(wwSize(wwBold("Города"), 18))
+    for city in cities:
+        l += formatCityLocation(city)
+    l.append(wBlockEnd())
+
+
+    l.append(wBlockStart('', 'quests'))
+    l.append(wwSize(wwBold("Квесты"), 18))
+    l.append('')
+    i = 1
+    for quest in quests:
+        l.append(wBlockStart('', 'quests__item'))
+        l.append(f"{i}. {quest['descr']}")
+        l.append(wwItalic(f"Награда: {quest['reward']} {'Многократный' if (quest['repeat?'] == 'да') else 'Однократный'}. Завершение: {quest['delivery']}"))
+        l.append(wBlockEnd())
+        i += 1
+    l.append(wBlockEnd())
+
+
+    def wrapSomeInfo(info: str, description: str):
+        return f"{wwColor(wwUnderline(info), 'blue')}. {wwItalic(description)}"
+
+
+    l.append(wBlockStart('', 'locations'))
+    l.append(wwSize(wwBold("Локации"), 18))
+    l.append('')
     
     def formatMetaLocation(metaLocation: MetaLocationDict):
         if (metaLocation['visibility'] != "1"):
@@ -395,30 +443,9 @@ def csvToDict(filename: str):
         ml.append(wwBold(wwColor(metaLocName, metaLocation['color'])))
 
         for loc in locations:
-            locationData = getLocationData(loc, metaLocName, f". {loc['color']}")
-            ml += locationData
+            ml += getLocationData(loc, metaLocName, f". {loc['color']}")
             
         return ml
-        
-
-    l.append(wwSize(wwBold("Города"), 18))
-    for city in cities:
-        l += formatCityLocation(city)
-
-
-    l.append(wwSize(wwBold("Квесты"), 18))
-    i = 1
-    for quest in quests:
-        l.append(f"{i}. {quest['descr']}")
-        l.append(wwItalic(f"Награда: {quest['reward']} {'Многократный' if (quest['repeat?'] == 'да') else 'Однократный'}. Завершение: {quest['delivery']}"))
-        l.append('')
-        i += 1
-
-
-    def wrapSomeInfo(info: str, description: str):
-        return f"{wwColor(wwUnderline(info), 'blue')}. {wwItalic(description)}"
-
-    l.append(wwSize(wwBold("Локации"), 18))
 
     generalLocInfo = '[Исследовать, охотиться, идти вглубь, искать проблем и т.д.]'
     generalLocDescription = 'Для всех локаций ниже доступны любые приказы: можно пытаться найти скрытую локацию, охотиться на монстров, собирать ресурсы или пытаться пройти вглубь в поисках новых локаций.'
@@ -427,44 +454,59 @@ def csvToDict(filename: str):
 
     for metaLocation in metaLocations:
         l += formatMetaLocation(metaLocation)
+    l.append(wBlockEnd())
         
 
+    l.append(wBlockStart('', 'alchemy'))
     l.append(wwSize(wwBold("Алхимия"), 18))
+    l.append('')
+
     generalAlchInfo = '[Сварить зелья]'
     generalAlchDescription = f"Потратив действие, можно попытаться сварить до трёх зелий. Каждое зелье состоит из ровно двух компонент. Можно пытаться сварить зелье \"вслепую\", не зная рецепта. Однако некоторые рецепты не сущетсвуют, и подобная попытка приведет к потере ингредиентов.\nАссортимент зелий меняется {wwUnderline('каждый')} ход!!!"
     
     l.append(wrapSomeInfo(generalAlchInfo, generalAlchDescription))
-    l.append(wwBold("Продажа и скупка зелий"))
+    l.append('')
+    l.append(wwBold(wwColor('Продажа и скупка зелий', 'black')))
+    l.append(wBlockStart('', 'shop'))
     for potion in potions:
         price = wrapGold(potion['limited_amt'], potion['sell'])
-        l.append (f"{price} {potion['name']}. {wwItalic(potion['effect'])} Скупка: {potion['buy']}")
+        l.append(f"{price} {potion['name']}. {wwItalic(potion['effect'])} Скупка: {potion['buy']}")
+    l.append(wBlockEnd())
     
-    l.append('') 
-    l.append(wwBold("Продажа и скупка ингредиентов"))
+    l.append(wwBold(wwColor('Продажа и скупка ингредиентов', 'black')))
+    l.append(wBlockStart('', 'shop'))
     for alchComp in alchComps:
         price = wrapGold(alchComp['amt'], alchComp['sell'])
-        l.append (f"{price} {alchComp['name']}. Скупка: {alchComp['buy']}")
-    l.append('')  
+        l.append(f"{price} {alchComp['name']}. Скупка: {alchComp['buy']}")
+    l.append(wBlockEnd())
+    l.append(wBlockEnd())
 
 
+    l.append(wBlockStart('', 'spells'))
     l.append(wwSize(wwBold("Заклинания"), 18))
     
     l.append(getSpoilerStart("Свойства Заклинаний (нажать для прочтения)"))
     for spelProperty in spellProperties:
-        l.append(f"{wwUnderline(spelProperty['name'])}. {spelProperty['description']}")
+        l.append(f"{wwBold(spelProperty['name'])} ─ {spelProperty['description']}")
     l.append(getSpoilerEnd())
         
     for generalScheme in generalSchemes:
         schemeName = generalScheme['name']
         l.append(getSpoilerStart(f"{schemeName} (нажать для прочтения)"))
         l.append(f"{schemeName}. {generalScheme['descr']}")
+        l.append('')
+
         for spell in spells:
             if spell['scheme'] == schemeName:
-                l.append('')
-                spellName = wwManaColor(spell['name'], spell['mana'].split(" ")[0])
-                l.append( f"[{wwColor(spell['rune'], runeColor)}, {spell['mana']}]. {spellName} {spell['tags']}")
+                l.append(wBlockStart('', 'spells__scheme-spell'))
+                spellManaColor = spell['mana'].split(' ')[0]
+                spellName = wwManaColor(spell['name'], spellManaColor)
+                spellMana = wwManaColor(spell['mana'], spellManaColor)
+                l.append( f"[{wwColor(spell['rune'], runeColor)}, {spellMana}]. {spellName} {spell['tags']}")
                 l.append(wwItalic(spell['descr']))
+                l.append(wBlockEnd())
         l.append(getSpoilerEnd())
+    l.append(wBlockEnd())
 
     l.append(wBlockEnd()) # 'message-content'
     return l
