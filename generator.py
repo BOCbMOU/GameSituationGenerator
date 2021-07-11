@@ -6,7 +6,7 @@ import csv
 
 # defaults -------------------------
 
-csvPath = './data/TestData.csv'
+csvPath = './data/TestData_new.csv'
 gsOutputPath = './output/GameSituation.txt'
 stylesOutputPath = './output/Styles.txt'
 
@@ -17,7 +17,7 @@ shouldAddStylesToGS = True
 def consoleCyanColor(text: str):
     return f'\x1b[36m{text}\x1b[0m'
 
-print(consoleCyanColor('Running...\n'));
+print(consoleCyanColor('\nRunning...'));
 
 #* CODE ----------------------------
 #* General -------------------------
@@ -141,16 +141,18 @@ def wrapGold(count: str, price: str):
 #* Parser --------------------------
 
 def readCsv(filename: str) -> "list[list[list[str]]]":
-    rows = []
+    rows: list[list[list[str]]] = []
     rowIndex = -1
 
     with open(filename, encoding = 'utf-8', newline = '') as csvFile:
-        spamreader = csv.reader(csvFile, delimiter = ',', quotechar = '"')
-        for row in spamreader:
-            if(row[1] == ''):
-                if(row[0] != ''):
-                    rows.append([])
-                    rowIndex += 1
+        scvReader = csv.reader(csvFile, delimiter = ',', quotechar = '"')
+        for row in scvReader:
+            if(row[0] == 'type'):
+                rows.append([])
+                rowIndex += 1
+                rows[rowIndex].append(row)
+                continue
+            if(row[1] != '1'): # visibility
                 continue
             rows[rowIndex].append(row)
     return rows
@@ -520,6 +522,7 @@ if (shouldAddStylesToGS):
     gameSituatuionText += styles
 
 #* Outputs --------------------------------------
+print(consoleCyanColor('Writing...'));
 
 gsOutput = open(gsOutputPath, 'a')
 gsOutput.truncate(0)
@@ -536,3 +539,6 @@ stylesOutput.truncate(0)
 stylesOutput.write(styles)
 
 stylesOutput.close()
+
+
+print(consoleCyanColor('\nFinnished\n'));
