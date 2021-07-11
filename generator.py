@@ -428,7 +428,7 @@ def csvToDict(filename: str):
 
 
     def wrapSomeInfo(info: str, description: str):
-        return f"{wwColor(wwUnderline(info), 'blue')}. {wwItalic(description)}"
+        return f"{wwUnderline(wwColor(info, 'blue'))}. {wwItalic(description)}"
 
 
     l.append(wBlockStart('', 'locations'))
@@ -524,7 +524,7 @@ if (shouldAddStylesToGS):
 #* Outputs --------------------------------------
 print(consoleCyanColor('Writing...'));
 
-gsOutput = open(gsOutputPath, 'a')
+gsOutput = open(gsOutputPath, 'a', encoding='utf-8')
 gsOutput.truncate(0)
 
 # print(gameSituatuionText)
@@ -532,7 +532,7 @@ gsOutput.write(gameSituatuionText)
 
 gsOutput.close()
 
-stylesOutput = open(stylesOutputPath, 'a')
+stylesOutput = open(stylesOutputPath, 'a', encoding='utf-8')
 stylesOutput.truncate(0)
 
 # print(styles)
