@@ -8,7 +8,7 @@ import csv
 
 csvPath = './data/TestData_new.csv'
 gsOutputPath = './output/GameSituation.txt'
-stylesOutputPath = './output/Styles.txt'
+stylesOutputPath = './output/GameSituationStyles.txt'
 
 shouldAddStylesToGS = True
 
@@ -513,13 +513,13 @@ def csvToDict(filename: str):
     l.append(wBlockEnd()) # 'message-content'
     return l
 
-gameSituatuion = csvToDict(csvPath)
-gameSituatuionText = '\n'.join(gameSituatuion)
+gameSituation = csvToDict(csvPath)
+gameSituationText = '\n'.join(gameSituation)
 
 styles = ''.join([colorizeStyles, spoilerStyles])
 
 if (shouldAddStylesToGS):
-    gameSituatuionText += styles
+    gameSituationText += styles
 
 #* Outputs --------------------------------------
 print(consoleCyanColor('Writing...'));
@@ -528,7 +528,7 @@ gsOutput = open(gsOutputPath, 'a', encoding='utf-8')
 gsOutput.truncate(0)
 
 # print(gameSituatuionText)
-gsOutput.write(gameSituatuionText)
+gsOutput.write(gameSituationText)
 
 gsOutput.close()
 
