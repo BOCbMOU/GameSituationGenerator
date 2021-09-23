@@ -1,60 +1,64 @@
 /* general */
-.bold {
+/* *bold */
+.bd {
   font-weight: bold;
 }
-.italic {
+/* *italic */
+.it {
   font-style: italic;
 }
-.underline {
+/* *underline */
+.ul {
   text-decoration: underline;
 }
 
 /* mana color */
-.text-highlight {
+/* *text-highlight */
+.t-h {
   padding: 0px 4px 1px;
 }
 
-.text-highlight__fire {
+.t-h__fire {
   color: #ff0;
   background: #de0000;
 }
 
-.text-highlight__water {
+.t-h__water {
   color: #b2ebf2;
   background: #00f;
 }
 
-.text-highlight__earth {
+.t-h__earth {
   color: #900000;
   background: #89ce8c;
 }
 
-.text-highlight__air {
+.t-h__air {
   color: white;
   background: #29b6f6;
 }
 
-.text-highlight__light {
+.t-h__light {
   color: #ffeb3b;
   background: #ab47bc;
 }
 
-.text-highlight__dark {
+.t-h__dark {
   color: #fe0000;
   background: #000;
 }
 
-.text-highlight__gold {
+.t-h__gold {
   color: gold;
   text-decoration: underline;
   background: #444;
 }
 
-div.inframe_rt .text-highlight__blur-border {
+div.inframe_rt .t-h__blur-border {
   box-shadow: inset 0 0 3px 2px #f6e9c9;
 }
 
-span.postbody .text-highlight__blur-border {
+span.postbody .t-h__blur-border {
   box-shadow: inset 0 0 3px 2px #dee3e7;
 }
 
@@ -64,50 +68,52 @@ span.postbody .text-highlight__blur-border {
   font-size: 0.75rem;
   color: #000;
 }
-.postbody .message-content .bold,
-.postbody .message-content .italic {
+.postbody .message-content .bd,
+.postbody .message-content .it {
   color: #006699;
 }
-.inframe_rt .message-content .bold,
-.inframe_rt .message-content .italic {
+.inframe_rt .message-content .bd,
+.inframe_rt .message-content .it {
   color: #775d39;
 }
-.message-content .underline {
+.message-content .ul {
   color: #000;
 }
 
 /* players */
-.players {
+/* *players */
+.pl {
   display: flex;
   flex-wrap: wrap;
 }
 
-.players__item {
+/* *players__item */
+.pl__i {
   box-sizing: border-box;
   width: 25%;
   min-width: 230px;
   margin: 0 0 28px;
   padding: 4px 16px 0 4px;
 }
-.players__item span[style] {
+.pl__i span[style] {
   color: #000;
 }
 
-.players__item-name {
+.pl__i-name {
   display: block;
   font-size: 14px;
   margin-bottom: 4px;
   font-weight: bold;
 }
-.players__item-name + br {
+.pl__i-name + br {
   display: none;
 }
 
-.players__item-mana {
+.pl__i-mana {
   margin-bottom: 4px;
 }
-.players__item-mana br,
-.players__item-mana + br {
+.pl__i-mana br,
+.pl__i-mana + br {
   display: none;
 }
 

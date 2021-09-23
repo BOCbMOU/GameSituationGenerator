@@ -100,13 +100,13 @@ def wwTableTd(text: str):
 #* Wrapers -------------------------
 
 def wwBold(text: str):
-    return wwInline(text, '', 'bold')
+    return wwInline(text, '', 'bd')
 
 def wwItalic(text: str):
-    return wwInline(text, '', 'italic')
+    return wwInline(text, '', 'it')
 
 def wwUnderline(text: str):
-    return wwInline(text, '', 'underline')
+    return wwInline(text, '', 'ul')
 
 def wwSize(text: str, size: int):
     return f'[size={size}]{text}[/size]'
@@ -125,22 +125,22 @@ def wwColor(text: str, color: str):
 
 def wwManaColor(mana: str, manaName: str):
     className = getManaClass(manaName)
-    return f'<span class="text-highlight {className} text-highlight__blur-border">{mana}</span>' if bool(className) else mana
+    return f'<span class="t-h {className} t-h__blur-border">{mana}</span>' if bool(className) else mana
 
     
 manaClass = {
     # 'Огонь': '#ff0',
-    'Огонь': 'text-highlight__fire',
+    'Огонь': 't-h__fire',
     # 'Вода': '#B2EBF2',
-    'Вода': 'text-highlight__water',
+    'Вода': 't-h__water',
     # 'Земля': '#9E002E',
-    'Земля': 'text-highlight__earth',
+    'Земля': 't-h__earth',
     # 'Воздух': '#fff',
-    'Воздух': 'text-highlight__air',
+    'Воздух': 't-h__air',
     # 'Свет': '#FFEB3B',
-    'Свет': 'text-highlight__light',
+    'Свет': 't-h__light',
     # 'Тьма': '#fe0000',
-    'Тьма': 'text-highlight__dark',
+    'Тьма': 't-h__dark',
 }
 
 def getManaClass(manaName: str):
@@ -153,7 +153,7 @@ def wrapMana(mana: str):
 def wrapGold(count: str, price: str):
     countText = f'{count} шт, ' if bool(count) else ''
     priceText = f'{price} зол.'
-    return f'<span class="text-highlight text-highlight__gold">[{countText}{priceText}]</span>'
+    return f'<span class="t-h t-h__gold">[{countText}{priceText}]</span>'
 
 
 
