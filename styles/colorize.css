@@ -181,6 +181,9 @@ span.postbody .t-h__blur-border {
 /* spells */
 .spells {
 }
+.spells > br {
+  display: none;
+}
 
 .spells__scheme-spell {
   margin-bottom: 8px;
@@ -210,3 +213,4 @@ span.postbody .t-h__blur-border {
 .poster {
   display: none;
 }
+

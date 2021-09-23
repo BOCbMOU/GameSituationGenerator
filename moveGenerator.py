@@ -33,7 +33,7 @@ def readTextFile(path: str):
 
 def wrapCss(cssAsText: str):
     inlineCss = removeNewLines(cssAsText)
-    noSpacesCss = re.sub('\\s+([\\{\\}:;>])\\s+', '\\1', inlineCss)
+    noSpacesCss = re.sub('/\\*.*?\\*/', '', re.sub('\\s*([\\{\\}:;>+])\\s*', '\\1', inlineCss))
     return f'<style type="text/css">{noSpacesCss}</style>'
 
 def getStyles(path: str):
